@@ -3,17 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/material": "^6.4.4",
-    "axios": "^1.7.9",
-    "cra-template": "1.2.0",
-    "framer-motion": "^12.4.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.5",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^4.2.4"
+  "@emotion/react": "^11.14.0",
+  "@emotion/styled": "^11.14.0",
+  "@fullcalendar/daygrid": "^6.1.15",
+  "@fullcalendar/interaction": "^6.1.15",
+  "@fullcalendar/react": "^6.1.15",
+  "@mui/icons-material": "^5.14.15",
+  "@mui/material": "^5.14.15",
+  "@mui/x-date-pickers": "^5.0.20",
+  "axios": "^1.7.9",
+  "cra-template": "1.2.0",
+  "date-fns": "^2.29.3",
+  "framer-motion": "^12.4.2",
+  "http-proxy-middleware": "^3.0.3",
+  "jwt-decode": "^4.0.0",
+  "react": "^18.2.0",
+  "react-dom": "^18.2.0",
+  "react-router-dom": "^7.1.5",
+  "react-scripts": "5.0.1",
+  "web-vitals": "^4.2.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -38,5 +46,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  }   
 }

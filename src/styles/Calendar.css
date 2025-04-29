@@ -1,0 +1,36 @@
+/* ✅ 선택된 날짜 강조 */
+.fc-day.selected-day {
+  background-color: #d1eaff !important;
+  border: 2px solid #2196f3 !important;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+
+/* ✅ 업무 있는 날짜 표시 색 보정 */
+.fc-daygrid-day.fc-day-today {
+  background-color: #fffde7; /* 오늘 날짜 표시 */
+}
+
+.fc-event {
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+}
+
+/* ✅ 엑셀 내보내기 버튼 커스터마이징 (클래스로 빼기) */
+.export-button {
+  padding: 8px 16px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.export-button:hover {
+  background-color: #1976d2;
+}
