@@ -5,6 +5,8 @@ import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import FindPwd from "./pages/FindPwd";
 import MyPage from "./pages/MyPage"; 
+import WorkReportCreate from './pages/WorkReportCreate';
+import WorkReportEdit from './pages/WorkReportEdit';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar"; 
 import ImportPage from "./pages/ImportPage"; 
@@ -36,6 +38,8 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/findPwd" element={<FindPwd />} />
           <Route path="/import" element={<ProtectedRoute element={<ImportPage />} />} />
+          <Route path="/report/create" element={<WorkReportCreate />} />
+          <Route path="/report/edit/:id" element={<WorkReportEdit />} />
         </Routes>
       </Router>
     </AuthProvider>
