@@ -1,26 +1,11 @@
-import React, { useState } from "react";
-import "../styles/WorkReportForm.css"; // ✨ 스타일 별도 적용
+import React from "react";
+import "../styles/WorkReportForm.css";
 
-export default function WorkReportForm({ mode = "create", initialData = {}, onSubmit }) {
-  const [form, setForm] = useState({
-    workHours: "",
-    client: "",
-    projectName: "",
-    systemName: "",
-    pjCode: "",
-    workType: "",
-    isBackup: false,
-    supportTeamMember: "",
-    outLocation: "",
-    content: "",
-    supportProducts: [],
-    ...initialData
-  });
-
+export default function WorkReportForm({ mode = "create", form, setForm, onSubmit }) {
   const productList = [
     "ksbiz", "nxKey", "transkey", "nxCR", "nxQR",
-    "AppFree", "mtweb", "mvweb",
-    "Wireless", "mT CS", "mV CS", "AC", "AI"
+    "AppFree", "mtweb", "mvweb", "Wireless",
+    "mT CS", "mV CS", "AC", "AI"
   ];
 
   const workTypeOptions = [
@@ -55,22 +40,18 @@ export default function WorkReportForm({ mode = "create", initialData = {}, onSu
         <label>업무시간 *</label>
         <input type="number" name="workHours" value={form.workHours} onChange={handleChange} required />
       </div>
-
       <div className="form-row">
         <label>고객사 *</label>
         <input type="text" name="client" value={form.client} onChange={handleChange} required />
       </div>
-
       <div className="form-row">
         <label>프로젝트/시스템명 *</label>
         <input type="text" name="projectName" value={form.projectName} onChange={handleChange} required />
       </div>
-
       <div className="form-row">
         <label>PJ-CODE</label>
         <input type="text" name="pjCode" value={form.pjCode} onChange={handleChange} />
       </div>
-
       <div className="form-row">
         <label>업무유형 *</label>
         <select name="workType" value={form.workType} onChange={handleChange} required>
@@ -80,29 +61,24 @@ export default function WorkReportForm({ mode = "create", initialData = {}, onSu
           ))}
         </select>
       </div>
-
       <div className="form-row checkbox-row">
         <label>
           <input type="checkbox" name="isBackup" checked={form.isBackup} onChange={handleChange} />
           팀원 백업
         </label>
       </div>
-
       <div className="form-row">
         <label>동반지원 팀원</label>
         <input type="text" name="supportTeamMember" value={form.supportTeamMember} onChange={handleChange} />
       </div>
-
       <div className="form-row">
         <label>출장 지역</label>
         <input type="text" name="outLocation" value={form.outLocation} onChange={handleChange} />
       </div>
-
       <div className="form-row">
         <label>업무 내용 *</label>
         <textarea name="content" value={form.content} onChange={handleChange} required rows={4} />
       </div>
-
       <div className="form-row">
         <label>지원 제품</label>
         <div className="checkbox-group">
@@ -118,7 +94,6 @@ export default function WorkReportForm({ mode = "create", initialData = {}, onSu
           ))}
         </div>
       </div>
-
       <div className="form-row">
         <button type="submit" className="submit-btn">
           {mode === "edit" ? "수정하기" : "등록하기"}
@@ -126,4 +101,14 @@ export default function WorkReportForm({ mode = "create", initialData = {}, onSu
       </div>
     </form>
   );
+}
+
+// 폼에 값이 존재하는지 체크하는 함수 (Dashboard에서 import해서 사용)
+export function isFormDirty(form) {
+  // 지원 제품 체크도 포함
+  return Object.entries(form).some(([k, v]) => {
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === "boolean") return v;
+    return v !== "" && v !== undefined && v !== null;
+  });
 }

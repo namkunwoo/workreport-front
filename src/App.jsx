@@ -4,6 +4,7 @@ import LoginForm from "./components/LoginForm";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import FindPwd from "./pages/FindPwd";
+import ResetPwd from "./pages/ResetPwd";
 import MyPage from "./pages/MyPage"; 
 import WorkReportCreate from './pages/WorkReportCreate';
 import WorkReportEdit from './pages/WorkReportEdit';
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="/mypage" element={<ProtectedRoute element={<MyPage />} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/findPwd" element={<FindPwd />} />
+          <Route path="/reset-password" element={<ResetPwd />} />
           <Route path="/import" element={<ProtectedRoute element={<ImportPage />} />} />
           <Route path="/report/create" element={<WorkReportCreate />} />
           <Route path="/report/edit/:id" element={<WorkReportEdit />} />
@@ -47,3 +49,4 @@ const App = () => {
 };
 
 export default App;
+

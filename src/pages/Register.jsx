@@ -21,6 +21,10 @@ const Register = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [timer, setTimer] = useState(0); // 🔥 인증 코드 만료 타이머 (5분)
   const [resendTimer, setResendTimer] = useState(0); // 🔥 재전송 타이머 (30초)
+  const [emailChecked, setEmailChecked] = useState(false); // ✅ 중복 확인 완료 여부 추가
+  const [emailValid, setEmailValid] = useState(true); // ✅ 이메일 유효성
+  const [passwordMatch, setPasswordMatch] = useState(true);
+
 
   const navigate = useNavigate();
 
@@ -57,8 +61,13 @@ const Register = () => {
 
   // ✅ 이메일 인증 코드 요청 (타이머 시작 + 재전송 버튼 비활성화)
   const requestEmailVerification = async () => {
-    if (!formData.email) {
-      setErrorMessage("⚠️ 이메일을 입력해주세요.");
+    if (!formData.email || !emailValid) {
+      setErrorMessage("⚠️ 올바른 이메일을 입력해주세요.");
+      return;
+    }
+
+    if (!emailChecked) {
+      setErrorMessage("⚠️ 이메일 중복 확인을 먼저 해주세요.");
       return;
     }
 
@@ -98,6 +107,37 @@ const Register = () => {
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "❌ 인증 코드 확인에 실패했습니다.");
     }
+  };
+
+  // ✅ 이메일 중복 확인
+  const checkEmailDuplication = async () => {
+    if (!formData.email) {
+      setErrorMessage("⚠️ 이메일을 입력해주세요.");
+      return;
+    }
+
+    try {
+      const res = await axios.get("/local/api/auth/check-email", {
+        params: { email: formData.email },
+      });
+      if (res.data.exists) {
+        setErrorMessage("❌ 이미 사용 중인 이메일입니다.");
+        setEmailChecked(false);
+      } else {
+        setSuccessMessage("✅ 사용 가능한 이메일입니다.");
+        setEmailChecked(true);
+      }
+    } catch {
+      setErrorMessage("❌ 이메일 중복 확인 실패. 다시 시도해주세요.");
+      setEmailChecked(false);
+    }
+  };
+
+  // ✅ 이메일 유효성 검사
+  const validateEmail = (email) => {
+    // 간단한 정규표현식: user@domain.tld
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
   };
 
 
@@ -148,11 +188,47 @@ const Register = () => {
 
         <form onSubmit={handleRegister}>
           <TextField fullWidth label="ID" name="id" variant="outlined" margin="normal" onChange={handleChange} required />
-          <TextField fullWidth type="password" label="Password" name="password" variant="outlined" margin="normal" onChange={handleChange} required />
-          <TextField fullWidth type="password" label="Confirm Password" name="confirmPassword" variant="outlined" margin="normal" onChange={handleChange} required />
+          <TextField fullWidth type="password" label="Password" name="password" variant="outlined" margin="normal"
+          onChange={(e) => {
+            handleChange(e);
+            if (e.target.name === "password" || e.target.name === "confirmPassword") {
+              const pwd = e.target.name === "password" ? e.target.value : formData.password;
+              const confirm = e.target.name === "confirmPassword" ? e.target.value : formData.confirmPassword;
+              setPasswordMatch(pwd === confirm);
+            }
+          }} required />
+          <TextField fullWidth type="password" label="Confirm Password" name="confirmPassword" variant="outlined" margin="normal" 
+          onChange={(e) => {
+            handleChange(e);
+            if (e.target.name === "password" || e.target.name === "confirmPassword") {
+              const pwd = e.target.name === "password" ? e.target.value : formData.password;
+              const confirm = e.target.name === "confirmPassword" ? e.target.value : formData.confirmPassword;
+              setPasswordMatch(pwd === confirm);
+            }
+          }} required 
+          error={formData.confirmPassword !== "" && !passwordMatch}/>
+          {formData.confirmPassword !== "" && !passwordMatch && (
+            <Typography variant="body2" color="error">
+              ❌ 비밀번호가 일치하지 않습니다.
+            </Typography>
+          )}
+
           <TextField fullWidth label="Name" name="name" variant="outlined" margin="normal" onChange={handleChange} required />
 
-          <TextField fullWidth type="email" label="Email" name="email" variant="outlined" margin="normal" onChange={handleChange} required />
+          <TextField fullWidth type="email" label="Email" name="email" variant="outlined" margin="normal" onChange={(e) => {handleChange(e); setEmailValid(validateEmail(e.target.value)); setEmailChecked(false); setSuccessMessage("");}} required error={formData.email !== "" && !emailValid}  />
+          {formData.email !== "" && !emailValid && (
+            <Typography variant="body2" color="error">
+              ❌ 이메일 형식이 올바르지 않습니다.
+            </Typography>
+          )}
+          <Button variant="outlined" color="info" onClick={checkEmailDuplication} sx={{ mt: 1 }} disabled={!emailValid}>
+            이메일 중복 확인
+          </Button>
+          {emailChecked && emailValid && (
+            <Alert severity="success" sx={{ mt: 1 }}>
+              ✅ 사용 가능한 이메일입니다.
+            </Alert>
+          )}
           <Button variant="outlined" color="primary" onClick={requestEmailVerification} disabled={resendTimer > 0} sx={{ mt: 1 }}>
             {resendTimer > 0 ? `재전송 가능 시간: ${resendTimer}초` : "인증 코드 요청"}
           </Button>
@@ -182,7 +258,7 @@ const Register = () => {
             </>
           )}
 
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={loading || !emailVerified}>
+          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={loading || !emailVerified || !passwordMatch}>
             {loading ? "처리 중..." : "Register"}
           </Button>
         </form>

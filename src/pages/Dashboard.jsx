@@ -12,7 +12,21 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import axios from "axios";
 import "../styles/Calendar.css";
 
-import WorkReportForm from "../components/WorkReportForm";
+import WorkReportForm, { isFormDirty } from "../components/WorkReportForm";
+
+const initialFormState = {
+  workHours: "",
+  client: "",
+  projectName: "",
+  systemName: "",
+  pjCode: "",
+  workType: "",
+  isBackup: false,
+  supportTeamMember: "",
+  outLocation: "",
+  content: "",
+  supportProducts: [],
+};
 
 const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -21,6 +35,8 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [addingTask, setAddingTask] = useState(false);
+
+  const [form, setForm] = useState({ ...initialFormState });
 
   useEffect(() => {
     axios.get("/local/api/work-reports/dates-with-reports")
@@ -40,13 +56,40 @@ const Dashboard = () => {
     const clickedDate = info.dateStr;
     setSelectedDate(clickedDate);
     loadTasks(clickedDate);
+    setAddingTask(false);
+    setForm({ ...initialFormState }); // 날짜 바뀌면 폼 리셋
   };
 
-  const loadTasks = (date) => {
-    axios.get(`/local/api/work-reports/by-date?date=${date}`)
-      .then((res) => setTasks(res.data))
-      .catch((err) => console.error("❌ 업무 데이터 조회 실패:", err));
+  // const loadTasks = (date) => {
+  //   axios.get(`/local/api/work-reports/by-date?date=${date}`)
+  //     .then((res) => setTasks(res.data))
+  //     .catch((err) => console.error("❌ 업무 데이터 조회 실패:", err));
+  // };
+
+  const loadTasks = async (date) => {
+    try {
+      const res = await axios.get(`/local/api/work-reports/by-date?date=${date}`);
+      //console.log("📦 Raw tasks:", res.data?.[0]); // isOut / out / outLocation 상태 확인
+
+      const normalized = (res.data || []).map((t) => {
+        // 1) 백엔드가 'isOut' 대신 'out'으로 내려주는 경우 대비
+        const raw = (typeof t.isOut !== "undefined") ? t.isOut : t.out;
+
+        // 2) 문자열 "true"/"false" → Boolean으로 강제
+        const isOut =
+          typeof raw === "boolean" ? raw
+          : typeof raw === "string" ? raw.toLowerCase() === "true"
+          : !!raw;
+
+        return { ...t, isOut };
+      });
+
+      setTasks(normalized);
+    } catch (err) {
+      console.error("❌ 업무 데이터 조회 실패:", err);
+    }
   };
+
 
   const downloadExcelFile = (blob, filename) => {
     const url = window.URL.createObjectURL(blob);
@@ -92,14 +135,23 @@ const Dashboard = () => {
         ...formData,
         workDate: selectedDate
       });
-
       alert("업무가 추가되었습니다!");
       setAddingTask(false);
+      setForm({ ...initialFormState }); // 등록 후 폼 리셋
       loadTasks(selectedDate);
     } catch (err) {
       console.error("❌ 업무 저장 실패:", err);
       alert("업무 저장에 실패했습니다.");
     }
+  };
+
+  // 업무 추가 폼 열고 닫기 (입력값 있을 때만 확인창)
+  const toggleAddTask = () => {
+    if (addingTask && isFormDirty(form)) {
+      if (!window.confirm("입력 중인 내용이 있습니다. 정말 창을 닫으시겠습니까?")) return;
+    }
+    setAddingTask((prev) => !prev);
+    if (addingTask) setForm({ ...initialFormState });
   };
 
   return (
@@ -137,16 +189,18 @@ const Dashboard = () => {
 
           <Button
             variant="outlined"
-            onClick={() => setAddingTask(true)}
+            onClick={toggleAddTask}
             sx={{ mb: 2 }}
           >
-            ➕ 새 업무 추가하기
+            {addingTask ? "❌ 업무 추가 취소" : "➕ 새 업무 추가하기"}
           </Button>
 
           {addingTask && (
             <Box sx={{ mb: 3 }}>
               <WorkReportForm
                 mode="create"
+                form={form}
+                setForm={setForm}
                 onSubmit={(formData) =>
                   handleSaveTask({
                     ...formData,
